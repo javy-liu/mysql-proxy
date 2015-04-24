@@ -1,12 +1,12 @@
-[[spring-data-rest-reference]]
-= Spring Data REST Reference Documentation
-Jon Brisbin, Oliver Gierke, Greg Turnquist
+[[mysql-proxy-reference]]
+= Mysql Proxy Reference Documentation
+Oyach
 :revnumber: {version}
 :revdate: {localdate}
 :toc:
 :toc-placement!:
 
-(C) 2012-2015 Original authors
+(C) 2015-2016 Original authors
 
 NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
 
