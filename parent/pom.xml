@@ -3,10 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.oyach.mysql</groupId>
-	<artifactId>mysql-proxy-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
+	<parent>
+		<groupId>org.oyach.mysql</groupId>
+		<artifactId>mysql-proxy</artifactId>
+		<version>1.7.0.BUILD-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+    <artifactId>mysql-proxy-parent</artifactId>
 
 	<name>Mysql Proxy Parent</name>
 	<description></description>
