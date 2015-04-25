@@ -3,33 +3,39 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.oyach.mysql</groupId>
+	<parent>
+		<groupId>org.oyach.mysql</groupId>
+		<artifactId>mysql-proxy-parent</artifactId>
+		<version>0.0.1.BUILD-SNAPSHOT</version>
+		<relativePath>parent/pom.xml</relativePath>
+	</parent>
+
 	<artifactId>mysql-proxy</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Mysql Proxy</name>
-	<description></description>
+	<description>Mysql Proxy Server</description>
+	<url>https://github.com/oyach/mysql-proxy</url>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.2.3.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
+	<organization>
+		<name>Fight Team.</name>
+		<url>https://github.com/fightteam</url>
+	</organization>
 
-
-	<modules>
-		<module>mysql-proxy-protocol</module>
-		<module>mysql-proxy-engine</module>
-		<module>mysql-proxy-plugins</module>
-		<module>mysql-proxy-daemon</module>
-	</modules>
+    <modules>
+        <module>parent</module>
+        <module>protocol</module>
+        <module>engine</module>
+        <module>plugins</module>
+        <module>daemon</module>
+        <module>docs</module>
+    </modules>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<start-class>demo.DemoApplication</start-class>
-		<java.version>1.7</java.version>
+		<project.type>multi</project.type>
+		<dist.id>mysql-proxy</dist.id>
+
+		<bundlor.enabled>false</bundlor.enabled>
 	</properties>
 
 	<developers>
@@ -46,69 +52,40 @@
 		</developer>
 	</developers>
 
-	<profiles>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<comments>
+				Copyright 2010 the original author or authors.
 
-		<profile>
-			<id>default</id>
+				Licensed under the Apache License, Version 2.0 (the "License");
+				you may not use this file except in compliance with the License.
+				You may obtain a copy of the License at
 
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-		</profile>
+				http://www.apache.org/licenses/LICENSE-2.0
 
-		<profile>
-			<id>mysql</id>
+				Unless required by applicable law or agreed to in writing, software
+				distributed under the License is distributed on an "AS IS" BASIS,
+				WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+				implied.
+				See the License for the specific language governing permissions and
+				limitations under the License.
+			</comments>
+		</license>
+	</licenses>
 
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
+	<scm>
+		<url>https://github.com/oyach/mysql-proxy</url>
+		<connection>scm:git:git://github.com/oyach/mysql-proxy.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com:oyach/mysql-proxy.git</developerConnection>
+	</scm>
 
-		</profile>
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/oyach/mysql-proxy/issues</url>
+	</issueManagement>
 
-	</profiles>
 
-	<dependencies>
-
-	
-
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>enforce-rules</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requireJavaVersion>
-									<version>[1.7,1.9)</version>
-								</requireJavaVersion>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
-	<repositories>
-		<repository>
-			<id>spring-libs-snapshot</id>
-			<url>https://repo.spring.io/libs-snapshot</url>
-		</repository>
-	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>spring-plugins-release</id>
-			<url>https://repo.spring.io/plugins-release</url>
-		</pluginRepository>
-	</pluginRepositories>
-	
 
 </project>

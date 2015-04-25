@@ -1,0 +1,27 @@
+[[mysql-proxy-reference]]
+= Mysql Proxy Reference Documentation
+Oyach
+:revnumber: {version}
+:revdate: {localdate}
+:toc:
+:toc-placement!:
+
+(C) 2015-2016 Original authors
+
+NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
+
+toc::[]
+
+include::preface.adoc[]
+
+[[reference]]
+= Reference Documentation
+
+include::intro.adoc[leveloffset=+1]
+include::getting-started.adoc[leveloffset=+1]
+
+
+[[appendix]]
+= Appendix
+
+:numbered!:

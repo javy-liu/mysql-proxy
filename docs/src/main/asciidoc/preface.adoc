@@ -1,0 +1,10 @@
+[[preface]]
+= Preface
+
+[[Project]]
+[preface]
+== Project metadata
+
+* Version control - https://github.com/oyach/mysql-proxy
+* Issues - https://github.com/oyach/mysql-proxy/issues
+* Project page - https://github.com/oyach/mysql-proxy

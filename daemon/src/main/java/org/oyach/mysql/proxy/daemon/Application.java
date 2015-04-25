@@ -1,18 +1,17 @@
-package java.mysql.proxy.daemon;
+package org.oyach.mysql.proxy.daemon;
 
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AppTest {
-    private static final Logger logger = LoggerFactory.getLogger(AppTest.class);
-
-    static {
-
-    }
-
-    @Test
-    public void test01() throws Exception {
+/**
+ * Created by oych on 15/4/25.
+ *
+ * @author oyach
+ * @since 0.0.1
+ */
+public class Application {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+    public static void main(String[] args) {
         logger.info("------------------{},{},{},{}", 1,2,3,4);
 
         logger.warn("------------------{},{},{},{}", 11,22,33,44);

@@ -8,26 +8,15 @@
         <version>0.0.1.BUILD-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>mysql-proxy-engine</artifactId>
+    <artifactId>mysql-proxy-docs</artifactId>
 
 
-    <dependencies>
-        <dependency>
-            <groupId>org.oyach.mysql</groupId>
-            <artifactId>mysql-proxy-plugins</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
