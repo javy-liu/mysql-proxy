@@ -7,27 +7,27 @@ package org.oyach.mysql.proxy;
  * @since 0.0.1
  */
 interface Base {
-    void init() throws Exception;
+    void init(Engine context) throws Exception;
 
-    void readHandshake() throws Exception;
+    void readHandshake(Engine context) throws Exception;
 
-    void sendHandshake();
+    void sendHandshake(Engine context) throws Exception;
 
-    void readAuth();
+    void readAuth(Engine context) throws Exception;
 
-    void sendAuth();
+    void sendAuth(Engine context) throws Exception;
 
-    void readAuthResult();
+    void readAuthResult(Engine context) throws Exception;
 
-    void sendAuthResult();
+    void sendAuthResult(Engine context) throws Exception;
 
-    void readQuery();
+    void readQuery(Engine context) throws Exception;
 
-    void sendQuery();
+    void sendQuery(Engine context) throws Exception;
 
-    void readQueryResult();
+    void readQueryResult(Engine context) throws Exception;
 
-    void sendQueryResult();
+    void sendQueryResult(Engine context) throws Exception;
 
-    void cleanUp();
+    void cleanUp(Engine context) throws Exception;
 }

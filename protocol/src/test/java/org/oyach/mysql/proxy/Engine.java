@@ -1,6 +1,8 @@
 package org.oyach.mysql.proxy;
 
 import org.oyach.mysql.protocol.Flags;
+import org.oyach.mysql.protocol.Handshake;
+import org.oyach.mysql.protocol.HandshakeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * 连接mysql服务器
@@ -42,7 +45,16 @@ public class Engine implements Runnable {
 
     private boolean running = true;
 
+    /** 插件 */
     private Base plugin;
+
+    public Handshake handshake = null;
+    public HandshakeResponse authReply = null;
+
+    // Packet Buffer. ArrayList so we can grow/shrink dynamically
+    public ArrayList<byte[]> buffer = new ArrayList<byte[]>();
+    public int offset = 0;
+
 
     public Engine(int port, Socket clientSocket, Base plugin) throws Exception {
         this.port = port;
@@ -158,7 +170,7 @@ public class Engine implements Runnable {
 
     public void init() {
         try {
-            plugin.init();
+            plugin.init(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -166,50 +178,90 @@ public class Engine implements Runnable {
 
     public void readHandshake() {
         try {
-            plugin.readHandshake();
+            plugin.readHandshake(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void sendHandshake() {
-        plugin.sendHandshake();
+        try {
+            plugin.sendHandshake(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void readAuth() {
-        plugin.readAuth();
+        try {
+            plugin.readAuth(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendAuth() {
-        plugin.sendAuth();
+        try {
+            plugin.sendAuth(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void readAuthResult() {
-        plugin.readAuthResult();
+        try {
+            plugin.readAuthResult(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendAuthResult() {
-        plugin.sendAuthResult();
+        try {
+            plugin.sendAuthResult(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void readQuery() {
-        plugin.readQuery();
+        try {
+            plugin.readQuery(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendQuery() {
-        plugin.sendQuery();
+        try {
+            plugin.sendQuery(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void readQueryResult() {
-        plugin.readQueryResult();
+        try {
+            plugin.readQueryResult(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendQueryResult() {
-        plugin.sendQueryResult();
+        try {
+            plugin.sendQueryResult(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void cleanUp() {
-        plugin.cleanUp();
+        try {
+            plugin.cleanUp(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void halt() {

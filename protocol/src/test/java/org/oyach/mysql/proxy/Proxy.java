@@ -1,6 +1,9 @@
 package org.oyach.mysql.proxy;
 
+import org.oyach.mysql.protocol.Flags;
+import org.oyach.mysql.protocol.Handshake;
 import org.oyach.mysql.protocol.Packet;
+import org.oyach.mysql.protocol.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +29,7 @@ public class Proxy implements Base {
     public InputStream mysqlIn;
     public OutputStream mysqlOut;
 
-    public void init() throws Exception {
+    public void init(Engine context) throws Exception {
         logger.trace("init");
 
         // 初始化
@@ -43,49 +46,63 @@ public class Proxy implements Base {
 
     }
 
-    public void readHandshake() throws Exception {
+    public void readHandshake(Engine context) throws Exception {
         logger.trace("readHandshake");
         byte[] packet = Packet.read_packet(this.mysqlIn);
-        System.out.println();
+
+        context.handshake = Handshake.loadFromPacket(packet);
+
+        // Remove some flags from the reply
+        context.handshake.removeCapabilityFlag(Flags.CLIENT_COMPRESS);
+        context.handshake.removeCapabilityFlag(Flags.CLIENT_SSL);
+        context.handshake.removeCapabilityFlag(Flags.CLIENT_LOCAL_FILES);
+
+        // Set the default result set creation to the server's character set
+        ResultSet.characterSet = context.handshake.characterSet;
+
+        // Set Replace the packet in the buffer
+        context.buffer.add(context.handshake.toPacket());
     }
 
-    public void sendHandshake() {
-
+    public void sendHandshake(Engine context) throws Exception {
+        this.logger.trace("send_handshake");
+        Packet.write(context.clientOut, context.buffer);
+        context.clear_buffer();
     }
 
-    public void readAuth() {
-
-    }
-
-    public void sendAuth() {
-
-    }
-
-    public void readAuthResult() {
-
-    }
-
-    public void sendAuthResult() {
-
-    }
-
-    public void readQuery() {
-
-    }
-
-    public void sendQuery() {
+    public void readAuth(Engine context) throws Exception {
 
     }
 
-    public void readQueryResult() {
+    public void sendAuth(Engine context) throws Exception {
 
     }
 
-    public void sendQueryResult() {
+    public void readAuthResult(Engine context) throws Exception {
 
     }
 
-    public void cleanUp() {
+    public void sendAuthResult(Engine context) throws Exception {
+
+    }
+
+    public void readQuery(Engine context) throws Exception {
+
+    }
+
+    public void sendQuery(Engine context) throws Exception {
+
+    }
+
+    public void readQueryResult(Engine context) throws Exception {
+
+    }
+
+    public void sendQueryResult(Engine context) throws Exception {
+
+    }
+
+    public void cleanUp(Engine context) throws Exception {
 
     }
 }
