@@ -2,23 +2,22 @@ package org.oyach.mysql.protocol;
 
 import java.util.ArrayList;
 
-public class ColCount extends Packet {
-    public long colCount = 0;
+public class OldAuthSwitchRequest extends Packet {
 
     public ArrayList<byte[]> getPayload() {
         ArrayList<byte[]> payload = new ArrayList<byte[]>();
 
-        payload.add(Proto.build_lenenc_int(this.colCount));
+        payload.add(Proto.build_byte(Flags.EOF));
 
         return payload;
     }
 
-    public static ColCount loadFromPacket(byte[] packet) {
-        ColCount obj = new ColCount();
+    public static OldAuthSwitchRequest loadFromPacket(byte[] packet) {
+        OldAuthSwitchRequest obj = new OldAuthSwitchRequest();
         Proto proto = new Proto(packet, 3);
 
         obj.sequenceId = proto.get_fixed_int(1);
-        obj.colCount = proto.get_lenenc_int();
+        proto.get_filler(1);
 
         return obj;
     }

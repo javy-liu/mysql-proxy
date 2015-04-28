@@ -2,12 +2,6 @@ package org.oyach.mysql.protocol;
 
 import java.util.ArrayList;
 
-/**
- * Created by oych on 15/4/28.
- *
- * @author oyach
- * @since 0.0.1
- */
 public class Handshake extends Packet {
     public long protocolVersion = 0x0a;
     public String serverVersion = "";
@@ -55,31 +49,30 @@ public class Handshake extends Packet {
     public ArrayList<byte[]> getPayload() {
         ArrayList<byte[]> payload = new ArrayList<byte[]>();
 
-        payload.add( Proto.build_fixed_int(1, this.protocolVersion));
-        payload.add( Proto.build_null_str(this.serverVersion));
-        payload.add( Proto.build_fixed_int(4, this.connectionId));
-        payload.add( Proto.build_fixed_str(8, this.challenge1));
-        payload.add( Proto.build_filler(1));
-        payload.add( Proto.build_fixed_int(2, this.capabilityFlags >> 16));
-        payload.add( Proto.build_fixed_int(1, this.characterSet));
-        payload.add( Proto.build_fixed_int(2, this.statusFlags));
-        payload.add( Proto.build_fixed_int(2, this.capabilityFlags & 0xffff));
+        payload.add(Proto.build_fixed_int(1, this.protocolVersion));
+        payload.add(Proto.build_null_str(this.serverVersion));
+        payload.add(Proto.build_fixed_int(4, this.connectionId));
+        payload.add(Proto.build_fixed_str(8, this.challenge1));
+        payload.add(Proto.build_filler(1));
+        payload.add(Proto.build_fixed_int(2, this.capabilityFlags >> 16));
+        payload.add(Proto.build_fixed_int(1, this.characterSet));
+        payload.add(Proto.build_fixed_int(2, this.statusFlags));
+        payload.add(Proto.build_fixed_int(2, this.capabilityFlags & 0xffff));
 
         if (this.hasCapabilityFlag(Flags.CLIENT_SECURE_CONNECTION)) {
-            payload.add( Proto.build_fixed_int(1, this.authPluginDataLength));
-        }
-        else {
-            payload.add( Proto.build_filler(1));
+            payload.add(Proto.build_fixed_int(1, this.authPluginDataLength));
+        } else {
+            payload.add(Proto.build_filler(1));
         }
 
-        payload.add( Proto.build_fixed_str(10, ""));
+        payload.add(Proto.build_fixed_str(10, ""));
 
         if (this.hasCapabilityFlag(Flags.CLIENT_SECURE_CONNECTION)) {
-            payload.add( Proto.build_fixed_str(Math.max(13, this.authPluginDataLength - 8), this.challenge2));
+            payload.add(Proto.build_fixed_str(Math.max(13, this.authPluginDataLength - 8), this.challenge2));
         }
 
         if (this.hasCapabilityFlag(Flags.CLIENT_PLUGIN_AUTH)) {
-            payload.add( Proto.build_null_str(this.authPluginName));
+            payload.add(Proto.build_null_str(this.authPluginName));
         }
 
         return payload;
@@ -104,8 +97,7 @@ public class Handshake extends Packet {
 
             if (obj.hasCapabilityFlag(Flags.CLIENT_PLUGIN_AUTH)) {
                 obj.authPluginDataLength = proto.get_fixed_int(1);
-            }
-            else {
+            } else {
                 proto.get_filler(1);
             }
 

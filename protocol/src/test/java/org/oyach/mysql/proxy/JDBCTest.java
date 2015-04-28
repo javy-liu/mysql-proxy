@@ -1,5 +1,6 @@
 package org.oyach.mysql.proxy;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.junit.Test;
 
 import java.sql.*;
@@ -38,22 +39,22 @@ public class JDBCTest {
             System.out.println("Creating statement...");
             stmt = conn.createStatement();
             String sql;
-            sql = "SELECT id, first, last, age FROM Employees";
+            sql = "SELECT username, password, enabled FROM users";
             ResultSet rs = stmt.executeQuery(sql);
 
             //STEP 5: Extract data from result set
             while(rs.next()){
                 //Retrieve by column name
-                int id  = rs.getInt("id");
-                int age = rs.getInt("age");
-                String first = rs.getString("first");
-                String last = rs.getString("last");
+
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                Boolean enabled = rs.getBoolean("enabled");
 
                 //Display values
-                System.out.print("ID: " + id);
-                System.out.print(", Age: " + age);
-                System.out.print(", First: " + first);
-                System.out.println(", Last: " + last);
+                System.out.print("username: " + username);
+                System.out.print(", password: " + password);
+                System.out.print(", enabled: " + enabled);
+
             }
             //STEP 6: Clean-up environment
             rs.close();

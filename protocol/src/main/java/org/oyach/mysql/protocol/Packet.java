@@ -1,5 +1,6 @@
 package org.oyach.mysql.protocol;
 
+import org.apache.commons.io.HexDump;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,14 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-/**
- * 握手数据包
- *
- * 客户端请求的时候，服务器返回数据
- *
- * @author oyach
- * @since 0.0.1
- */
 public abstract class Packet {
     private static final Logger logger = LoggerFactory.getLogger(Packet.class);
     public long sequenceId = 0;
@@ -27,16 +20,16 @@ public abstract class Packet {
         ArrayList<byte[]> payload = this.getPayload();
 
         int size = 0;
-        for (byte[] field: payload)
+        for (byte[] field : payload)
             size += field.length;
 
-        byte[] packet = new byte[size+4];
+        byte[] packet = new byte[size + 4];
 
         System.arraycopy(Proto.build_fixed_int(3, size), 0, packet, 0, 3);
         System.arraycopy(Proto.build_fixed_int(1, this.sequenceId), 0, packet, 3, 1);
 
         int offset = 4;
-        for (byte[] field: payload) {
+        for (byte[] field : payload) {
             System.arraycopy(field, 0, packet, offset, field.length);
             offset += field.length;
         }
@@ -44,15 +37,41 @@ public abstract class Packet {
         return packet;
     }
 
-    /**
-     * 读取握手数据包
-     *
-     * 握手包格式
-     *
-     * @param in
-     * @return
-     * @throws IOException
-     */
+    public static int getSize(byte[] packet) {
+        int size = (int) new Proto(packet).get_fixed_int(3);
+        return size;
+    }
+
+    public static byte getType(byte[] packet) {
+        return packet[4];
+    }
+
+    public static long getSequenceId(byte[] packet) {
+        return new Proto(packet, 3).get_fixed_int(1);
+    }
+
+    public static final void dump(byte[] packet) {
+
+
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            HexDump.dump(packet, 0, out, 0);
+            logger.trace("Dumping packet\n" + out.toString());
+        } catch (IOException e) {
+            return;
+        }
+    }
+
+    public static final void dump_stderr(byte[] packet) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            HexDump.dump(packet, 0, out, 0);
+            System.err.println("Dumping packet\n" + out.toString());
+        } catch (IOException e) {
+            return;
+        }
+    }
+
     public static byte[] read_packet(InputStream in) throws IOException {
         int b = 0;
         int size = 0;
@@ -71,7 +90,7 @@ public abstract class Packet {
 
         size = Packet.getSize(packet);
 
-        byte[] packet_tmp = new byte[size+4];
+        byte[] packet_tmp = new byte[size + 4];
         System.arraycopy(packet, 0, packet_tmp, 0, 3);
         packet = packet_tmp;
         packet_tmp = null;
@@ -86,50 +105,16 @@ public abstract class Packet {
         } while (offset != target);
 
         return packet;
-
     }
-
-
-    public static int getSize(byte[] packet) {
-        int size = (int) new Proto(packet).get_fixed_int(3);
-        return size;
-    }
-
-    public static byte getType(byte[] packet) {
-        return packet[4];
-    }
-
-    public static long getSequenceId(byte[] packet) {
-        return new Proto(packet, 3).get_fixed_int(1);
-    }
-
-    public static final void dump(byte[] packet) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HexDump.dump(packet, 0, out, 0);
-        logger.trace("Dumping packet\n{}", out.toString());
-
-    }
-
-    public static final void dump_stderr(byte[] packet) {
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            HexDump.dump(packet, 0, out, 0);
-            System.err.println("Dumping packet\n"+out.toString());
-        }
-        catch (IOException e) {
-            return;
-        }
-    }
-
 
     public static ArrayList<byte[]> read_full_result_set(InputStream in, OutputStream out, ArrayList<byte[]> buffer, boolean bufferResultSet) throws IOException {
         // Assume we have the start of a result set already
 
-        byte[] packet = buffer.get((buffer.size()-1));
+        byte[] packet = buffer.get((buffer.size() - 1));
         long colCount = ColCount.loadFromPacket(packet).colCount;
 
         // Read the columns and the EOF field
-        for (int i = 0; i < (colCount+1); i++) {
+        for (int i = 0; i < (colCount + 1); i++) {
             packet = Packet.read_packet(in);
             if (packet == null) {
                 throw new IOException();
@@ -165,7 +150,7 @@ public abstract class Packet {
                 break;
             }
 
-            if (position+packet.length > packedPacketSize) {
+            if (position + packet.length > packedPacketSize) {
                 int subsize = packedPacketSize - position;
                 System.arraycopy(packet, 0, packedPacket, position, subsize);
                 buffer.add(packedPacket);
@@ -179,10 +164,9 @@ public abstract class Packet {
 
                 packedPacket = new byte[packedPacketSize];
                 position = 0;
-                System.arraycopy(packet, subsize, packedPacket, position, packet.length-subsize);
-                position += packet.length-subsize;
-            }
-            else {
+                System.arraycopy(packet, subsize, packedPacket, position, packet.length - subsize);
+                position += packet.length - subsize;
+            } else {
                 System.arraycopy(packet, 0, packedPacket, position, packet.length);
                 position += packet.length;
             }
@@ -208,7 +192,7 @@ public abstract class Packet {
     }
 
     public static void write(OutputStream out, ArrayList<byte[]> buffer) throws IOException {
-        for (byte[] packet: buffer) {
+        for (byte[] packet : buffer) {
             out.write(packet);
         }
     }

@@ -2,12 +2,6 @@ package org.oyach.mysql.protocol;
 
 import java.util.ArrayList;
 
-/**
- * Created by oych on 15/4/28.
- *
- * @author oyach
- * @since 0.0.1
- */
 public class ResultSet {
     public long sequenceId = 1;
     public static long characterSet = 0;
@@ -20,7 +14,7 @@ public class ResultSet {
 
         long maxRowSize = 0;
 
-        for (Column col: this.columns) {
+        for (Column col : this.columns) {
             long size = col.toPacket().length;
             if (size > maxRowSize)
                 maxRowSize = size;
@@ -34,7 +28,7 @@ public class ResultSet {
         colCount.colCount = this.columns.size();
         packets.add(colCount.toPacket());
 
-        for (Column col: this.columns) {
+        for (Column col : this.columns) {
             col.sequenceId = this.sequenceId;
             col.columnLength = maxRowSize;
             this.sequenceId++;
@@ -46,7 +40,7 @@ public class ResultSet {
         this.sequenceId++;
         packets.add(eof.toPacket());
 
-        for (Row row: this.rows) {
+        for (Row row : this.rows) {
             row.sequenceId = this.sequenceId;
             this.sequenceId++;
             packets.add(row.toPacket());

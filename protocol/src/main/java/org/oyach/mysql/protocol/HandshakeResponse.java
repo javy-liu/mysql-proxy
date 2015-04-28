@@ -2,12 +2,6 @@ package org.oyach.mysql.protocol;
 
 import java.util.ArrayList;
 
-/**
- * Created by oych on 15/4/28.
- *
- * @author oyach
- * @since 0.0.1
- */
 public class HandshakeResponse extends Packet {
     public long capabilityFlags = Flags.CLIENT_PROTOCOL_41;
     public long maxPacketSize = 0;
@@ -40,46 +34,42 @@ public class HandshakeResponse extends Packet {
         ArrayList<byte[]> payload = new ArrayList<byte[]>();
 
         if ((this.capabilityFlags & Flags.CLIENT_PROTOCOL_41) != 0) {
-            payload.add( Proto.build_fixed_int(4, this.capabilityFlags));
-            payload.add( Proto.build_fixed_int(4, this.maxPacketSize));
-            payload.add( Proto.build_fixed_int(1, this.characterSet));
-            payload.add( Proto.build_filler(23));
-            payload.add( Proto.build_null_str(this.username));
+            payload.add(Proto.build_fixed_int(4, this.capabilityFlags));
+            payload.add(Proto.build_fixed_int(4, this.maxPacketSize));
+            payload.add(Proto.build_fixed_int(1, this.characterSet));
+            payload.add(Proto.build_filler(23));
+            payload.add(Proto.build_null_str(this.username));
             if (this.hasCapabilityFlag(Flags.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA)) {
-                payload.add( Proto.build_lenenc_int(this.authResponseLen));
-                payload.add( Proto.build_fixed_str(this.authResponseLen, this.authResponse, true));
-            }
-            else {
+                payload.add(Proto.build_lenenc_int(this.authResponseLen));
+                payload.add(Proto.build_fixed_str(this.authResponseLen, this.authResponse, true));
+            } else {
                 if (this.hasCapabilityFlag(Flags.CLIENT_SECURE_CONNECTION)) {
-                    payload.add( Proto.build_fixed_int(1, this.authResponseLen));
-                    payload.add( Proto.build_fixed_str(this.authResponseLen, this.authResponse, true));
-                }
-                else
-                    payload.add( Proto.build_null_str(this.authResponse));
+                    payload.add(Proto.build_fixed_int(1, this.authResponseLen));
+                    payload.add(Proto.build_fixed_str(this.authResponseLen, this.authResponse, true));
+                } else
+                    payload.add(Proto.build_null_str(this.authResponse));
             }
 
             if (this.hasCapabilityFlag(Flags.CLIENT_CONNECT_WITH_DB))
-                payload.add( Proto.build_null_str(this.schema));
+                payload.add(Proto.build_null_str(this.schema));
 
             if (this.hasCapabilityFlag(Flags.CLIENT_PLUGIN_AUTH))
-                payload.add( Proto.build_null_str(this.pluginName));
+                payload.add(Proto.build_null_str(this.pluginName));
 
             if (this.hasCapabilityFlag(Flags.CLIENT_CONNECT_ATTRS)) {
-                payload.add( Proto.build_lenenc_int(this.clientAttributesLen));
-                payload.add( Proto.build_eop_str(this.clientAttributes));
+                payload.add(Proto.build_lenenc_int(this.clientAttributesLen));
+                payload.add(Proto.build_eop_str(this.clientAttributes));
             }
-        }
-        else {
-            payload.add( Proto.build_fixed_int(2, this.capabilityFlags));
-            payload.add( Proto.build_fixed_int(3, this.maxPacketSize));
-            payload.add( Proto.build_null_str(this.username));
+        } else {
+            payload.add(Proto.build_fixed_int(2, this.capabilityFlags));
+            payload.add(Proto.build_fixed_int(3, this.maxPacketSize));
+            payload.add(Proto.build_null_str(this.username));
 
             if (this.hasCapabilityFlag(Flags.CLIENT_CONNECT_WITH_DB)) {
-                payload.add( Proto.build_null_str(this.authResponse));
-                payload.add( Proto.build_null_str(this.schema));
-            }
-            else
-                payload.add( Proto.build_eop_str(this.authResponse));
+                payload.add(Proto.build_null_str(this.authResponse));
+                payload.add(Proto.build_null_str(this.schema));
+            } else
+                payload.add(Proto.build_eop_str(this.authResponse));
 
         }
 
@@ -104,13 +94,11 @@ public class HandshakeResponse extends Packet {
             if (obj.hasCapabilityFlag(Flags.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA)) {
                 obj.authResponseLen = proto.get_lenenc_int();
                 obj.authResponse = proto.get_fixed_str(obj.authResponseLen, true);
-            }
-            else  {
+            } else {
                 if (obj.hasCapabilityFlag(Flags.CLIENT_SECURE_CONNECTION)) {
                     obj.authResponseLen = proto.get_fixed_int(1);
                     obj.authResponse = proto.get_fixed_str(obj.authResponseLen, true);
-                }
-                else {
+                } else {
                     obj.authResponse = proto.get_null_str();
                 }
             }
@@ -125,8 +113,7 @@ public class HandshakeResponse extends Packet {
                 obj.clientAttributesLen = proto.get_lenenc_int();
                 obj.clientAttributes = proto.get_eop_str();
             }
-        }
-        else {
+        } else {
             obj.capabilityFlags = proto.get_fixed_int(2);
             obj.maxPacketSize = proto.get_fixed_int(3);
             obj.username = proto.get_null_str();
@@ -134,8 +121,7 @@ public class HandshakeResponse extends Packet {
             if (obj.hasCapabilityFlag(Flags.CLIENT_CONNECT_WITH_DB)) {
                 obj.authResponse = proto.get_null_str();
                 obj.schema = proto.get_null_str();
-            }
-            else
+            } else
                 obj.authResponse = proto.get_eop_str();
         }
 

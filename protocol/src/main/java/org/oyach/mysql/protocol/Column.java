@@ -2,12 +2,6 @@ package org.oyach.mysql.protocol;
 
 import java.util.ArrayList;
 
-/**
- * Created by oych on 15/4/28.
- *
- * @author oyach
- * @since 0.0.1
- */
 public class Column extends Packet {
     public String catalog = "def";
     public String schema = "";
@@ -21,7 +15,8 @@ public class Column extends Packet {
     public long flags = 0;
     public long decimals = 31;
 
-    public Column() {}
+    public Column() {
+    }
 
     public Column(String name) {
         // Set this up by default. Allow overrides if needed
@@ -38,7 +33,7 @@ public class Column extends Packet {
         payload.add(Proto.build_lenenc_str(this.org_table));
         payload.add(Proto.build_lenenc_str(this.name));
         payload.add(Proto.build_lenenc_str(this.org_name));
-        payload.add(Proto.build_filler(1, (byte)0x0c));
+        payload.add(Proto.build_filler(1, (byte) 0x0c));
         payload.add(Proto.build_fixed_int(2, this.characterSet));
         payload.add(Proto.build_fixed_int(4, this.columnLength));
         payload.add(Proto.build_fixed_int(1, this.type));

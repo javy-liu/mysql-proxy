@@ -1,293 +1,208 @@
 package org.oyach.mysql.proxy;
 
-import org.oyach.mysql.protocol.Flags;
-import org.oyach.mysql.protocol.Handshake;
-import org.oyach.mysql.protocol.HandshakeResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/*
+ * Base proxy code. This should really just move data back and forth
+ * Calling plugins as needed
+ */
 
-import java.io.BufferedInputStream;
+import java.net.Socket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
+import java.io.BufferedInputStream;
 import java.util.ArrayList;
 
-/**
- * 连接mysql服务器
- *
- * @author oyach
- * @since 0.0.1
- */
+import org.oyach.mysql.protocol.Flags;
+import org.oyach.mysql.protocol.Handshake;
+import org.oyach.mysql.protocol.HandshakeResponse;
+import org.oyach.mysql.proxy.plugin.Base;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Engine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(Engine.class);
-
-    /**
-     * 连接端口
-     */
-    public int port;
-
-    /**
-     * 记录客户端连接
-     */
-    public Socket clientSocket;
-
-    public InputStream clientIn;
-
-    public OutputStream clientOut;
-
-    /**
-     * 记录过程步骤
-     */
-    public int mode = Flags.MODE_INIT;
-
-    public int nextMode = Flags.MODE_INIT;
-
+    
+    public int port = 0;
+    
+    public Socket clientSocket = null;
+    public InputStream clientIn = null;
+    public OutputStream clientOut = null;
+    
+    // Plugins
+    public ArrayList<Base> plugins = new ArrayList<Base>();
+    
+    // Packet Buffer. ArrayList so we can grow/shrink dynamically
+    public ArrayList<byte[]> buffer = new ArrayList<byte[]>();
+    public int offset = 0;
+    
+    // Stop the thread?
     public boolean running = true;
 
-    /** 插件 */
-    public Base plugin;
-
+    // What sorta of result set should we expect?
+    public int expectedResultSet = Flags.RS_OK;
+    
+    // Connection info
     public Handshake handshake = null;
     public HandshakeResponse authReply = null;
-
+    
     public String schema = "";
     public String query = "";
     public long statusFlags = 0;
     public long sequenceId = 0;
-
+    
     // Buffer or directly pass though the data
     public boolean bufferResultSet = true;
     public boolean packResultSet = true;
-
-    // Packet Buffer. ArrayList so we can grow/shrink dynamically
-    public ArrayList<byte[]> buffer = new ArrayList<byte[]>();
-    public int offset = 0;
-
-
-    public Engine(int port, Socket clientSocket, Base plugin) throws Exception {
+    
+    // Modes
+    public int mode = Flags.MODE_INIT;
+    
+    // Allow plugins to muck with the modes
+    public int nextMode = Flags.MODE_INIT;
+    
+    public Engine(int port, Socket clientSocket, ArrayList<Base> plugins) throws IOException {
         this.port = port;
+        this.plugins = plugins;
+        
         this.clientSocket = clientSocket;
-        this.plugin = plugin;
-
-        this.clientSocket.setTcpNoDelay(true); // 立即发送数据
-        this.clientSocket.setTrafficClass(0x10); // 低延迟
-        this.clientSocket.setKeepAlive(true); // 保持空闲连接
-
+        this.clientSocket.setPerformancePreferences(0, 2, 1);
+        this.clientSocket.setTcpNoDelay(true);
+        this.clientSocket.setTrafficClass(0x10);
+        this.clientSocket.setKeepAlive(true);
+        
         this.clientIn = new BufferedInputStream(this.clientSocket.getInputStream(), 16384);
         this.clientOut = this.clientSocket.getOutputStream();
     }
 
     public void run() {
-
         try {
             while (this.running) {
                 switch (this.mode) {
                     case Flags.MODE_INIT:
                         logger.trace("MODE_INIT");
                         this.nextMode = Flags.MODE_READ_HANDSHAKE;
-                        init();
+                        for (Base plugin : this.plugins)
+                            plugin.init(this);
                         break;
-
+                    
                     case Flags.MODE_READ_HANDSHAKE:
                         logger.trace("MODE_READ_HANDSHAKE");
                         this.nextMode = Flags.MODE_SEND_HANDSHAKE;
-                        readHandshake();
+                        for (Base plugin : this.plugins)
+                            plugin.read_handshake(this);
                         break;
-
+                    
                     case Flags.MODE_SEND_HANDSHAKE:
                         logger.trace("MODE_SEND_HANDSHAKE");
                         this.nextMode = Flags.MODE_READ_AUTH;
-                        sendHandshake();
+                        for (Base plugin : this.plugins)
+                            plugin.send_handshake(this);
                         break;
-
+                    
                     case Flags.MODE_READ_AUTH:
                         logger.trace("MODE_READ_AUTH");
                         this.nextMode = Flags.MODE_SEND_AUTH;
-                        readAuth();
+                        for (Base plugin : this.plugins)
+                            plugin.read_auth(this);
                         break;
-
+                    
                     case Flags.MODE_SEND_AUTH:
                         logger.trace("MODE_SEND_AUTH");
                         this.nextMode = Flags.MODE_READ_AUTH_RESULT;
-                        sendAuth();
+                        for (Base plugin : this.plugins)
+                            plugin.send_auth(this);
                         break;
-
+                    
                     case Flags.MODE_READ_AUTH_RESULT:
                         logger.trace("MODE_READ_AUTH_RESULT");
                         this.nextMode = Flags.MODE_SEND_AUTH_RESULT;
-                        readAuthResult();
+                        for (Base plugin : this.plugins)
+                            plugin.read_auth_result(this);
                         break;
-
+                    
                     case Flags.MODE_SEND_AUTH_RESULT:
                         logger.trace("MODE_SEND_AUTH_RESULT");
                         this.nextMode = Flags.MODE_READ_QUERY;
-                        sendAuthResult();
+                        for (Base plugin : this.plugins)
+                            plugin.send_auth_result(this);
                         break;
-
+                    
                     case Flags.MODE_READ_QUERY:
                         logger.trace("MODE_READ_QUERY");
                         this.nextMode = Flags.MODE_SEND_QUERY;
-                        readQuery();
+                        for (Base plugin : this.plugins)
+                            plugin.read_query(this);
                         break;
-
+                    
                     case Flags.MODE_SEND_QUERY:
                         logger.trace("MODE_SEND_QUERY");
                         this.nextMode = Flags.MODE_READ_QUERY_RESULT;
-                        sendQuery();
+                        for (Base plugin : this.plugins)
+                            plugin.send_query(this);
                         break;
-
+                    
                     case Flags.MODE_READ_QUERY_RESULT:
                         logger.trace("MODE_READ_QUERY_RESULT");
                         this.nextMode = Flags.MODE_SEND_QUERY_RESULT;
-                        readQueryResult();
+                        for (Base plugin : this.plugins)
+                            plugin.read_query_result(this);
                         break;
-
+                    
                     case Flags.MODE_SEND_QUERY_RESULT:
                         logger.trace("MODE_SEND_QUERY_RESULT");
-                        this.nextMode = Flags.MODE_CLEANUP;
-                        sendQueryResult();
+                        this.nextMode = Flags.MODE_READ_QUERY;
+                        for (Base plugin : this.plugins)
+                            plugin.send_query_result(this);
                         break;
-
+                    
                     case Flags.MODE_CLEANUP:
                         logger.trace("MODE_CLEANUP");
-                        this.nextMode = Flags.MODE_SEND_HANDSHAKE;
-                        cleanUp();
-                        break;
-
-                    default:
-                        logger.error("未知过程: " + this.mode);
+                        this.nextMode = Flags.MODE_CLEANUP;
+                        for (Base plugin : this.plugins)
+                            plugin.cleanup(this);
                         this.halt();
+                        break;
+                    
+                    default:
+                        logger.error("UNKNOWN MODE " + this.mode);
+                        this.halt();
+                        break;
                 }
                 this.mode = this.nextMode;
             }
-
-            logger.info("线程退出");
+            
+            logger.info("Exiting thread.");            
             this.clientSocket.close();
-
-        } catch (Exception e) {
-            logger.debug(e.getMessage());
-        } finally {
+        }
+        catch (IOException e) {}
+        finally {
             try {
                 this.clientSocket.close();
-            } catch (IOException e) {
-                logger.debug(e.getMessage());
             }
+            catch (IOException e) {}
+            
+            try {
+                for (Base plugin : this.plugins)
+                            plugin.cleanup(this);
+            }
+            catch (IOException e) {}
         }
     }
-
-
-    public void init() {
-        try {
-            plugin.init(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void readHandshake() {
-        try {
-            plugin.readHandshake(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendHandshake() {
-        try {
-            plugin.sendHandshake(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void readAuth() {
-        try {
-            plugin.readAuth(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendAuth() {
-        try {
-            plugin.sendAuth(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void readAuthResult() {
-        try {
-            plugin.readAuthResult(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendAuthResult() {
-        try {
-            plugin.sendAuthResult(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void readQuery() {
-        try {
-            plugin.readQuery(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendQuery() {
-        try {
-            plugin.sendQuery(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void readQueryResult() {
-        try {
-            plugin.readQueryResult(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sendQueryResult() {
-        try {
-            plugin.sendQueryResult(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void cleanUp() {
-        try {
-            plugin.cleanUp(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void halt() {
-        logger.trace("停止");
-        this.running = false;
-    }
-
+    
     public void buffer_result_set() {
         if (!this.bufferResultSet)
             this.bufferResultSet = true;
     }
-
-
+    
+    public void halt() {
+        logger.trace("Halting!");
+        this.running = false;
+    }
+    
     public void clear_buffer() {
         logger.trace("Clearing Buffer.");
         this.offset = 0;
-
+        
         // With how ehcache works, if we clear the buffer via .clear(), it also
         // clears the cached value. Create a new ArrayList and count on java
         // cleaning up after ourselves.

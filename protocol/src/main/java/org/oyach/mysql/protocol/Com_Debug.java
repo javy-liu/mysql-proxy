@@ -2,23 +2,20 @@ package org.oyach.mysql.protocol;
 
 import java.util.ArrayList;
 
-public class ColCount extends Packet {
-    public long colCount = 0;
-
+public class Com_Debug extends Packet {
     public ArrayList<byte[]> getPayload() {
         ArrayList<byte[]> payload = new ArrayList<byte[]>();
 
-        payload.add(Proto.build_lenenc_int(this.colCount));
+        payload.add(Proto.build_byte(Flags.COM_DEBUG));
 
         return payload;
     }
 
-    public static ColCount loadFromPacket(byte[] packet) {
-        ColCount obj = new ColCount();
+    public static Com_Debug loadFromPacket(byte[] packet) {
+        Com_Debug obj = new Com_Debug();
         Proto proto = new Proto(packet, 3);
 
         obj.sequenceId = proto.get_fixed_int(1);
-        obj.colCount = proto.get_lenenc_int();
 
         return obj;
     }

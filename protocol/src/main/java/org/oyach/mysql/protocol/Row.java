@@ -2,20 +2,15 @@ package org.oyach.mysql.protocol;
 
 import java.util.ArrayList;
 
-/**
- * Created by oych on 15/4/28.
- *
- * @author oyach
- * @since 0.0.1
- */
 public class Row extends Packet {
     public int type = Flags.ROW_TYPE_TEXT;
     public int colType = Flags.MYSQL_TYPE_VAR_STRING;
     public ArrayList<Object> data = new ArrayList<Object>();
 
-    public Row () {}
+    public Row() {
+    }
 
-    public Row (String data1) {
+    public Row(String data1) {
         this.addData(data1);
     }
 
@@ -23,27 +18,27 @@ public class Row extends Packet {
         this.data.add(data);
     }
 
-    public Row (String data1, Integer data2) {
+    public Row(String data1, Integer data2) {
         this.addData(data1);
         this.addData(data2);
     }
 
-    public Row (String data1, long data2) {
+    public Row(String data1, long data2) {
         this.addData(data1);
         this.addData(data2);
     }
 
-    public Row (String data1, float data2) {
+    public Row(String data1, float data2) {
         this.addData(data1);
         this.addData(data2);
     }
 
-    public Row (String data1, boolean data2) {
+    public Row(String data1, boolean data2) {
         this.addData(data1);
         this.addData(data2);
     }
 
-    public Row (String data1, String data2) {
+    public Row(String data1, String data2) {
         this.addData(data1);
         this.addData(data2);
     }
@@ -69,13 +64,13 @@ public class Row extends Packet {
     public ArrayList<byte[]> getPayload() {
         ArrayList<byte[]> payload = new ArrayList<byte[]>();
 
-        for (Object obj: this.data) {
+        for (Object obj : this.data) {
             switch (this.type) {
                 case Flags.ROW_TYPE_TEXT:
                     if (obj instanceof String)
-                        payload.add(Proto.build_lenenc_str((String)obj));
+                        payload.add(Proto.build_lenenc_str((String) obj));
                     else if (obj instanceof Integer || obj == null)
-                        payload.add(Proto.build_lenenc_int((Integer)obj));
+                        payload.add(Proto.build_lenenc_int((Integer) obj));
                     else {
                         // trigger error
                     }

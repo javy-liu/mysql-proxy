@@ -2,7 +2,9 @@ package org.oyach.mysql.protocol;
 
 import java.util.ArrayList;
 
-public class EOF extends Packet {
+public class OK extends Packet {
+    public long affectedRows = 0;
+    public long lastInsertId = 0;
     public long statusFlags = 0;
     public long warnings = 0;
 
@@ -25,21 +27,25 @@ public class EOF extends Packet {
     public ArrayList<byte[]> getPayload() {
         ArrayList<byte[]> payload = new ArrayList<byte[]>();
 
-        payload.add(Proto.build_byte(Flags.EOF));
-        payload.add(Proto.build_fixed_int(2, this.warnings));
+        payload.add(Proto.build_byte(Flags.OK));
+        payload.add(Proto.build_lenenc_int(this.affectedRows));
+        payload.add(Proto.build_lenenc_int(this.lastInsertId));
         payload.add(Proto.build_fixed_int(2, this.statusFlags));
+        payload.add(Proto.build_fixed_int(2, this.warnings));
 
         return payload;
     }
 
-    public static EOF loadFromPacket(byte[] packet) {
-        EOF obj = new EOF();
+    public static OK loadFromPacket(byte[] packet) {
+        OK obj = new OK();
         Proto proto = new Proto(packet, 3);
 
         obj.sequenceId = proto.get_fixed_int(1);
         proto.get_filler(1);
-        obj.warnings = proto.get_fixed_int(2);
+        obj.affectedRows = proto.get_lenenc_int();
+        obj.lastInsertId = proto.get_lenenc_int();
         obj.statusFlags = proto.get_fixed_int(2);
+        obj.warnings = proto.get_fixed_int(2);
 
         return obj;
     }
