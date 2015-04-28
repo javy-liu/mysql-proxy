@@ -25,31 +25,40 @@ public class Engine implements Runnable {
     /**
      * 连接端口
      */
-    private int port;
+    public int port;
 
     /**
      * 记录客户端连接
      */
-    private Socket clientSocket;
+    public Socket clientSocket;
 
-    private InputStream clientIn;
+    public InputStream clientIn;
 
-    private OutputStream clientOut;
+    public OutputStream clientOut;
 
     /**
      * 记录过程步骤
      */
-    private int mode = Flags.MODE_INIT;
+    public int mode = Flags.MODE_INIT;
 
-    private int nextMode = Flags.MODE_INIT;
+    public int nextMode = Flags.MODE_INIT;
 
-    private boolean running = true;
+    public boolean running = true;
 
     /** 插件 */
-    private Base plugin;
+    public Base plugin;
 
     public Handshake handshake = null;
     public HandshakeResponse authReply = null;
+
+    public String schema = "";
+    public String query = "";
+    public long statusFlags = 0;
+    public long sequenceId = 0;
+
+    // Buffer or directly pass though the data
+    public boolean bufferResultSet = true;
+    public boolean packResultSet = true;
 
     // Packet Buffer. ArrayList so we can grow/shrink dynamically
     public ArrayList<byte[]> buffer = new ArrayList<byte[]>();
@@ -267,5 +276,21 @@ public class Engine implements Runnable {
     public void halt() {
         logger.trace("停止");
         this.running = false;
+    }
+
+    public void buffer_result_set() {
+        if (!this.bufferResultSet)
+            this.bufferResultSet = true;
+    }
+
+
+    public void clear_buffer() {
+        logger.trace("Clearing Buffer.");
+        this.offset = 0;
+
+        // With how ehcache works, if we clear the buffer via .clear(), it also
+        // clears the cached value. Create a new ArrayList and count on java
+        // cleaning up after ourselves.
+        this.buffer = new ArrayList<byte[]>();
     }
 }
