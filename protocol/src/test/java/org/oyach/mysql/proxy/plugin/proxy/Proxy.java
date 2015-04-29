@@ -124,7 +124,8 @@ public class Proxy extends Base {
         
         context.sequenceId = Packet.getSequenceId(packet);
         logger.trace("Client sequenceId: "+context.sequenceId);
-        
+
+        // 3 表示大小  1 表示类型 sql
         switch (Packet.getType(packet)) {
             case Flags.COM_QUIT:
                 logger.trace("COM_QUIT");
@@ -141,6 +142,35 @@ public class Proxy extends Base {
             case Flags.COM_QUERY:
                 logger.trace("COM_QUERY");
                 context.query = Com_Query.loadFromPacket(packet).query;
+
+                context.buffer.set(context.buffer.size() - 1, new byte[]{27, 0, 0, 0, 3,
+                        115 ,
+                        101 ,
+                        108 ,
+                        101 ,
+                        99 ,
+                        116 ,
+                        32 ,
+                        117 ,
+                        115 ,
+                        101 ,
+                        114 ,
+                        110 ,
+                        97 ,
+                        109 ,
+                        101 ,
+                        32 ,
+                        102 ,
+                        114 ,
+                        111 ,
+                        109 ,
+                        32 ,
+                        117 ,
+                        115 ,
+                        101 ,
+                        114 ,
+                        115 });
+
                 break;
             
             default:

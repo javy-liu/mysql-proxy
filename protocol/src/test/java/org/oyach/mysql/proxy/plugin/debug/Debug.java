@@ -18,41 +18,41 @@ public class Debug extends Base {
     private static final Logger logger = LoggerFactory.getLogger(Debug.class);
     
     public void read_handshake(Engine context) {
-        this.logger.debug("<- HandshakePacket");
-        this.logger.debug("   Server Version: "+context.handshake.serverVersion);
-        this.logger.debug("   Connection Id: "+context.handshake.connectionId);
-        this.logger.debug("   Server Capability Flags: "
+        logger.debug("<- HandshakePacket");
+        logger.debug("   Server Version: "+context.handshake.serverVersion);
+        logger.debug("   Connection Id: "+context.handshake.connectionId);
+        logger.debug("   Server Capability Flags: "
                           + Debug.dump_capability_flags(context.handshake.capabilityFlags));
     }
     
     public void read_auth(Engine context) {
-        this.logger.debug("-> AuthResponsePacket");
-        this.logger.debug("   Max Packet Size: "+context.authReply.maxPacketSize);
-        this.logger.debug("   User: "+context.authReply.username);
-        this.logger.debug("   Schema: "+context.authReply.schema);
+        logger.debug("-> AuthResponsePacket");
+        logger.debug("   Max Packet Size: "+context.authReply.maxPacketSize);
+        logger.debug("   User: "+context.authReply.username);
+        logger.debug("   Schema: "+context.authReply.schema);
         
-        this.logger.debug("   Client Capability Flags: "
+        logger.debug("   Client Capability Flags: "
                           + Debug.dump_capability_flags(context.authReply.capabilityFlags));
     }
     
     public void read_query(Engine context) {
         switch (Packet.getType(context.buffer.get(context.buffer.size()-1))) {
             case Flags.COM_QUIT:
-                this.logger.info("-> COM_QUIT");
+                logger.info("-> COM_QUIT");
                 break;
             
             // Extract out the new default schema
             case Flags.COM_INIT_DB:
-                this.logger.info("-> USE "+context.schema);
+                logger.info("-> USE "+context.schema);
                 break;
             
             // Query
             case Flags.COM_QUERY:
-                this.logger.info("-> "+context.query);
+                logger.info("-> "+context.query);
                 break;
             
             default:
-                this.logger.debug("Packet is "+Packet.getType(context.buffer.get(context.buffer.size()-1))+" type.");
+                logger.debug("Packet is "+Packet.getType(context.buffer.get(context.buffer.size()-1))+" type.");
                 Debug.dump_buffer(context);
                 break;
         }
@@ -65,15 +65,15 @@ public class Debug extends Base {
         
         switch (Packet.getType(context.buffer.get(context.buffer.size() - 1))) {
             case Flags.OK:
-                this.logger.info("<- OK");
+                logger.info("<- OK");
                 break;
             
             case Flags.ERR:
-                this.logger.info("<- ERR");
+                logger.info("<- ERR");
                 break;
             
             default:
-                this.logger.debug("Result set or Packet is "+Packet.getType(context.buffer.get(context.buffer.size()-1))+" type.");
+                logger.debug("Result set or Packet is "+Packet.getType(context.buffer.get(context.buffer.size()-1))+" type.");
                 break;
         }
     }

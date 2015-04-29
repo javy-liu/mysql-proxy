@@ -1,0 +1,52 @@
+[[install-chapter]]
+= about mysql
+
+[[about.introduction]]
+== Introduction
+
+mysql连接协议
+
+1.读取mysql服务器的头信息
+- 3 二进制大小
+- 1 sequenceId
+- 1 protocolVersion
+- 直到0x00 serverVersion
+- 4 connectionId
+- 8 challenge1
+- 1 分隔符
+- 2 capabilityFlags
+
+以下不一定有
+- 1 characterSet
+- 2 statusFlags
+- 2 capabilityFlags
+
+判断是否需要认证
+- 1 authPluginDataLength
+- 1 分隔符
+
+- 10 分隔符
+
+判断连接类型
+- 13-52 challenge2
+
+判断插件名
+- 直到0x00 authPluginName
+
+读取完成后客服端需要解析(mysql-jdbc.jar中可以进行解析)，解析完成后进行下一步
+
+2. 构造mysql客户端头信息
+- 3 二进制大小
+- 待续~
+
+3. 读取mysql服务器需要认证信息参数
+
+4. 构造mysql客户端认证信息
+
+5. 读取mysql服务器认证结果
+
+6. 发送sql
+
+7. 读取结果
+
+8. 关闭处理
