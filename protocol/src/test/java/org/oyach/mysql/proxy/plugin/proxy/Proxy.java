@@ -45,7 +45,7 @@ public class Proxy extends Base {
         this.mysqlSocket.setTrafficClass(0x10);
         this.mysqlSocket.setKeepAlive(true);
         
-        logger.info("Connected to mysql server at "+this.mysqlHost+":"+this.mysqlPort);
+        logger.info("Connected to mysql server at " + this.mysqlHost + ":" + this.mysqlPort);
         this.mysqlIn = new BufferedInputStream(this.mysqlSocket.getInputStream(), 16384);
         this.mysqlOut = this.mysqlSocket.getOutputStream();
     }
@@ -126,6 +126,7 @@ public class Proxy extends Base {
         logger.trace("Client sequenceId: "+context.sequenceId);
 
         // 3 表示大小  1 表示类型 sql
+        // 1 退出  2初始化数据库 3查询
         switch (Packet.getType(packet)) {
             case Flags.COM_QUIT:
                 logger.trace("COM_QUIT");
@@ -142,37 +143,44 @@ public class Proxy extends Base {
             case Flags.COM_QUERY:
                 logger.trace("COM_QUERY");
                 context.query = Com_Query.loadFromPacket(packet).query;
+                logger.debug("query ====> {}", context.query);
+//                if (context.query.contains("select")){
+//                    context.buffer.set(context.buffer.size() - 1, new byte[]{27, 0, 0, 0, 3,
+//                            115 ,
+//                            101 ,
+//                            108 ,
+//                            101 ,
+//                            99 ,
+//                            116 ,
+//                            32 ,
+//                            117 ,
+//                            115 ,
+//                            101 ,
+//                            114 ,
+//                            110 ,
+//                            97 ,
+//                            109 ,
+//                            101 ,
+//                            32 ,
+//                            102 ,
+//                            114 ,
+//                            111 ,
+//                            109 ,
+//                            32 ,
+//                            117 ,
+//                            115 ,
+//                            101 ,
+//                            114 ,
+//                            115 });
+//                }
 
-                context.buffer.set(context.buffer.size() - 1, new byte[]{27, 0, 0, 0, 3,
-                        115 ,
-                        101 ,
-                        108 ,
-                        101 ,
-                        99 ,
-                        116 ,
-                        32 ,
-                        117 ,
-                        115 ,
-                        101 ,
-                        114 ,
-                        110 ,
-                        97 ,
-                        109 ,
-                        101 ,
-                        32 ,
-                        102 ,
-                        114 ,
-                        111 ,
-                        109 ,
-                        32 ,
-                        117 ,
-                        115 ,
-                        101 ,
-                        114 ,
-                        115 });
 
                 break;
-            
+            case Flags.COM_FIELD_LIST:
+                logger.trace("COM_FIELD_LIST");
+                context.query = Com_Query.loadFromPacket(packet).query;
+                logger.debug("query ====> {}", context.query);
+                break;
             default:
                 break;
         }

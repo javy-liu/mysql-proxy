@@ -7,6 +7,7 @@ package org.oyach.mysql.proxy.plugin.debug;
 
 import java.util.ArrayList;
 
+import org.oyach.mysql.protocol.Com_Query;
 import org.oyach.mysql.protocol.Flags;
 import org.oyach.mysql.protocol.Packet;
 import org.oyach.mysql.proxy.Engine;
@@ -50,9 +51,14 @@ public class Debug extends Base {
             case Flags.COM_QUERY:
                 logger.info("-> "+context.query);
                 break;
-            
+
+            case Flags.COM_FIELD_LIST:
+                logger.trace("COM_FIELD_LIST");
+                logger.debug("query ====> {}", context.query);
+                break;
             default:
                 logger.debug("Packet is "+Packet.getType(context.buffer.get(context.buffer.size()-1))+" type.");
+                logger.debug("-> {}", context.query);
                 Debug.dump_buffer(context);
                 break;
         }
